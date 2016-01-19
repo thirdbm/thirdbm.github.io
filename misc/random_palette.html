@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Random Palette</title>
+<link rel="stylesheet" type="text/css" href="../style_common.css">
+<style>
+	a {	color : #aaff00; text-decoration : none; }
+	body { background-color:#222222; margin-top:8px; color : #eeeeee; font-family:Verdana; font-size:16px; margin:0px; padding:0px; }
+	#btn_minus, #btn_plus { width:24px; height:24px; font-size:18px; border:0px solid white; background:#444444; color:#eeeeee; font-weight:bold; vertical-align:middle; }
+</style>
+</head>
+<body>
+	<center>
+	<table width="300" border="0"><tr><td width="50" align="left"><button id="btn_minus">-</button></td><td align="center">Random Palette</td><td width="50" align="right"><button id="btn_plus">+</button></td></tr></table>
+	<div id="canv"></div>
+	<p>2016-01-14 <a href="http://twitter.com/thirdbm" target="_blank">@ThirdBM</a></p>
+	</center>
+</body>
+<script>
+var palette_num = 0, PAL_MIN=2, PAL_MAX=6;
+var cn = document.createElement("CANVAS");
+document.getElementById("canv").appendChild(cn);
+//cn.style.border = "4px solid #eee";
+cn.width = 300;
+cn.height = 320;
+cn.style.background = "#808080";
+var cx = cn.getContext("2d");
+
+function dice(min,max){ return Math.round( Math.random()*(max-min) ) +min; }
+
+function rgbToHex(r,g,b){
+	var h1 = r.toString(16);
+	var h2 = g.toString(16);
+	var h3 = g.toString(16);
+	return "#" + h1 + h2 + h3;
+}
+
+function init(){
+	palette_num = 3;
+	draw();
+	cx.font = "10pt Verdana";
+	cx.textAlign = "center";
+	cx.fillStyle = "#ffffff";
+	cx.fillText("Touch here to change palette.", cn.width/2, cn.height/2);
+}
+
+function draw(){
+	cx.clearRect( 0 , 0 , cn.width , cn.height );
+
+	if( palette_num<=PAL_MIN ){
+		btn_minus.style.visibility = "hidden";
+	} else {
+		btn_minus.style.visibility = "visible"
+	}
+	if( palette_num>=PAL_MAX ){
+		btn_plus.style.visibility = "hidden";
+	} else {
+		btn_plus.style.visibility = "visible"
+	}
+
+	var color_w = cn.width / palette_num;
+	var color = [];
+	color.length = palette_num;
+	for( var i=0; i<palette_num; i++ ){
+		color[i] = [];
+		color[i][0] = dice(0,255);
+		color[i][1] = dice(0,255);
+		color[i][2] = dice(0,255);
+	}
+	for( var i=0; i<palette_num; i++ ){
+		cx.fillStyle="rgb("+color[i][0]+","+color[i][1]+","+color[i][2]+")";
+		cx.fillRect( color_w*i , 0 , color_w , cn.height );
+
+		var average = ( color[i][0] + color[i][1] + color[i][2] ) / 3;
+		var hex = rgbToHex( color[i][0] , color[i][1] , color[i][2] );
+		cx.font = "6pt Verdana";
+		cx.textAlign = "left";
+		if( average > 140 ){
+			cx.fillStyle = "#000000";
+		} else {
+			cx.fillStyle = "#ffffff";
+		}
+		//cx.fillStyle = "rgb("+(255-color[i][0])+","+(255-color[i][1])+","+(255-color[i][2]);
+		cx.fillText("R "+color[i][0], color_w*i +6, cn.height -36);
+		cx.fillText("G "+color[i][1], color_w*i +6, cn.height -26);
+		cx.fillText("B "+color[i][2], color_w*i +6, cn.height -16);
+		cx.fillText(hex, color_w*i +6, cn.height -6);
+	}
+}
+
+window.onload = function(){ init(); }
+cn.onclick = function(){ draw(); }
+btn_minus.onclick = function(){
+	if( palette_num>PAL_MIN ){
+		palette_num--;
+		draw();
+	}
+}
+btn_plus.onclick = function(){
+	if( palette_num<PAL_MAX ){
+		palette_num++;
+		draw();		
+	}
+}
+</script>
+</html>
