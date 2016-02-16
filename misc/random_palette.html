@@ -32,8 +32,21 @@ function dice(min,max){ return Math.round( Math.random()*(max-min) ) +min; }
 function rgbToHex(r,g,b){
 	var h1 = r.toString(16);
 	var h2 = g.toString(16);
-	var h3 = g.toString(16);
-	return "#" + h1 + h2 + h3;
+	var h3 = b.toString(16);
+
+	var h1s = ""+h1;
+	var h2s = ""+h2;
+	var h3s = ""+h3;
+	if( h1s.length == 1 ) {
+		h1s = "0"+h1;
+	}
+	if( h2s.length == 1 ) {
+		h2s = "0"+h2;
+	}
+	if( h3s.length == 1 ) {
+		h3s = "0"+h3;
+	}
+	return "#" + h1s + h2s + h3s;
 }
 
 function init(){
