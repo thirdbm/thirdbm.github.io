@@ -17,7 +17,7 @@
 <table border="0"><tr><td>
 	<div id="speechbubble" style="border:3px solid black; background:#e0d6af; color:#000000; font-weight:bold; width:100px; padding:4px; line-height:16px; visibility:hidden; word-wrap:break-word;"></div>
 	</td><td>
-	<img src="mumblo.png">
+	<img src="asset/img_mumblo.png">
 </td></tr></table>
 <div><input type="text" name="textfield" id="inputtxt" value="Hello, I am Mumblo." size="22" maxlength="50"><input type="button" value=">" id="inputbtn" onclick="main();"></div>
 <p>Turn on the sound please.<br>This page works for Google Chrome and Firefox. (PC)</p>
@@ -49,47 +49,47 @@ function setchannel() {
 		
 		channel[i] = new Audio();
 
-		if (word[i]==" "|word[i]=="."|word[i]==",") { channel[i].src = "au/mute.ogg"; }
-		if (word[i]=="A"|word[i]=="a") { channel[i].src = "au/a.ogg"; }
-		if (word[i]=="B"|word[i]=="b") { channel[i].src = "au/b.ogg"; }
+		if (word[i]==" "|word[i]=="."|word[i]==",") { channel[i].src = "asset/au_mute.ogg"; }
+		if (word[i]=="A"|word[i]=="a") { channel[i].src = "asset/au_a.ogg"; }
+		if (word[i]=="B"|word[i]=="b") { channel[i].src = "asset/au_b.ogg"; }
 		if (word[i]=="C"|word[i]=="c") { 
-			if (word[i+1]=="I"|word[i+1]=="i"|word[i+1]=="E"|word[i+1]=="e"|word[i+1]=="Y"|word[i+1]=="y") { channel[i].src = "au/s.ogg"; }
-			else { channel[i].src = "au/k.ogg"; }
+			if (word[i+1]=="I"|word[i+1]=="i"|word[i+1]=="E"|word[i+1]=="e"|word[i+1]=="Y"|word[i+1]=="y") { channel[i].src = "asset/au_s.ogg"; }
+			else { channel[i].src = "asset/au_k.ogg"; }
 		}
-		if (word[i]=="D"|word[i]=="d") { channel[i].src = "au/d.ogg"; }
+		if (word[i]=="D"|word[i]=="d") { channel[i].src = "asset/au_d.ogg"; }
 		if (word[i]=="E"|word[i]=="e") {
-			if (word[i+1]==" "|word[i+1]==null) { channel[i].src = "au/mute.ogg"; }
-			else { channel[i].src = "au/e.ogg"; }
+			if (word[i+1]==" "|word[i+1]==null) { channel[i].src = "asset/au_mute.ogg"; }
+			else { channel[i].src = "asset/au_e.ogg"; }
 		}
-		if (word[i]=="F"|word[i]=="f") { channel[i].src = "au/f.ogg"; }
-		if (word[i]=="G"|word[i]=="g") { channel[i].src = "au/g.ogg"; }
-		if (word[i]=="H"|word[i]=="h") { channel[i].src = "au/h.ogg"; }
+		if (word[i]=="F"|word[i]=="f") { channel[i].src = "asset/au_f.ogg"; }
+		if (word[i]=="G"|word[i]=="g") { channel[i].src = "asset/au_g.ogg"; }
+		if (word[i]=="H"|word[i]=="h") { channel[i].src = "asset/au_h.ogg"; }
 		if (word[i]=="I"|word[i]=="i") {
-			if (word[i+1]==" "|word[i+1]==null) { channel[i].src = "au/ai.ogg"; }
-			else { channel[i].src = "au/i.ogg"; }
+			if (word[i+1]==" "|word[i+1]==null) { channel[i].src = "asset/au_ai.ogg"; }
+			else { channel[i].src = "asset/au_i.ogg"; }
 		}
-		if (word[i]=="J"|word[i]=="j") { channel[i].src = "au/j.ogg"; }
-		if (word[i]=="K"|word[i]=="k") { channel[i].src = "au/k.ogg"; }
-		if (word[i]=="L"|word[i]=="l") { channel[i].src = "au/l.ogg"; }
-		if (word[i]=="M"|word[i]=="m") { channel[i].src = "au/m.ogg"; }
-		if (word[i]=="N"|word[i]=="n") { channel[i].src = "au/n.ogg"; }
-		if (word[i]=="O"|word[i]=="o") { channel[i].src = "au/o.ogg"; }
-		if (word[i]=="P"|word[i]=="p") { channel[i].src = "au/p.ogg"; }
-		if (word[i]=="Q"|word[i]=="q") { channel[i].src = "au/k.ogg"; }
-		if (word[i]=="R"|word[i]=="r") { channel[i].src = "au/r.ogg"; }
-		if (word[i]=="S"|word[i]=="s") { channel[i].src = "au/s.ogg"; }
-		if (word[i]=="T"|word[i]=="t") { channel[i].src = "au/t.ogg"; }
-		if (word[i]=="U"|word[i]=="u") { channel[i].src = "au/u.ogg"; }
-		if (word[i]=="V"|word[i]=="v") { channel[i].src = "au/v.ogg"; }
-		if (word[i]=="W"|word[i]=="w") { channel[i].src = "au/u.ogg"; }
-		if (word[i]=="X"|word[i]=="x") { channel[i].src = "au/x.ogg"; }
+		if (word[i]=="J"|word[i]=="j") { channel[i].src = "asset/au_j.ogg"; }
+		if (word[i]=="K"|word[i]=="k") { channel[i].src = "asset/au_k.ogg"; }
+		if (word[i]=="L"|word[i]=="l") { channel[i].src = "asset/au_l.ogg"; }
+		if (word[i]=="M"|word[i]=="m") { channel[i].src = "asset/au_m.ogg"; }
+		if (word[i]=="N"|word[i]=="n") { channel[i].src = "asset/au_n.ogg"; }
+		if (word[i]=="O"|word[i]=="o") { channel[i].src = "asset/au_o.ogg"; }
+		if (word[i]=="P"|word[i]=="p") { channel[i].src = "asset/au_p.ogg"; }
+		if (word[i]=="Q"|word[i]=="q") { channel[i].src = "asset/au_k.ogg"; }
+		if (word[i]=="R"|word[i]=="r") { channel[i].src = "asset/au_r.ogg"; }
+		if (word[i]=="S"|word[i]=="s") { channel[i].src = "asset/au_s.ogg"; }
+		if (word[i]=="T"|word[i]=="t") { channel[i].src = "asset/au_t.ogg"; }
+		if (word[i]=="U"|word[i]=="u") { channel[i].src = "asset/au_u.ogg"; }
+		if (word[i]=="V"|word[i]=="v") { channel[i].src = "asset/au_v.ogg"; }
+		if (word[i]=="W"|word[i]=="w") { channel[i].src = "asset/au_u.ogg"; }
+		if (word[i]=="X"|word[i]=="x") { channel[i].src = "asset/au_x.ogg"; }
 		if (word[i]=="Y"|word[i]=="y") { 
-			if(word[i+1]==" "|word[i+1]==null) { channel[i].src = "au/ai.ogg"; }
-			if(word[i-1]=="N"|word[i-1]=="n"|word[i-1]=="D"|word[i-1]=="d") { channel[i].src = "au/i.ogg"; }
-			else { channel[i].src = "au/y.ogg"; }
+			if(word[i+1]==" "|word[i+1]==null) { channel[i].src = "asset/au_ai.ogg"; }
+			if(word[i-1]=="N"|word[i-1]=="n"|word[i-1]=="D"|word[i-1]=="d") { channel[i].src = "asset/au_i.ogg"; }
+			else { channel[i].src = "asset/au_y.ogg"; }
 		}
-		if (word[i]=="Z"|word[i]=="z") { channel[i].src = "au/z.ogg"; }
-		if (word[i]=="?") { channel[i].src = "au/question.ogg"; }
+		if (word[i]=="Z"|word[i]=="z") { channel[i].src = "asset/au_z.ogg"; }
+		if (word[i]=="?") { channel[i].src = "asset/au_question.ogg"; }
 	}
 	
 	execute();
