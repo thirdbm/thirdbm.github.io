@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Canvas to String - Example</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<style>
+    a {color:#00dd00; text-decoration: none;}
+	body { margin:0px; padding:0px; background:#111111; font-family:Verdana; color:#eeeeee; }
+</style>
+</head>
+<body>
+<canvas id="canv" width="240" height="320"></canvas>
+</body>
+<script>
+var cn,cx;
+var MAGNIFY = 4;
+var grassImg = new Image();
+grassImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAd0lEQVQYV12Q2xXAIAhD40zZiZ3anZjJHhAs4I8PyE1k8cFWCIgXtlQJUu8ZpNcWhNsKtcEFQ7yMOAswIB1qCj9746UpoDwxGhFyGkPbNhPbyryN2HKGZZL/jPHbalmn4L/OEaS328ZY8q0RZ7ER68DTNrPeOwQfBMFXLCeE7C4AAAAASUVORK5CYII=";
+var heroImg = new Image();
+heroImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAi0lEQVQYV32Q0RWDIAxFHyPEVWAEV7ArdKauUFdwBFjFN0J7Xg5oVSofBHIuySUBdZnZp51/I8mgu2+C1mnqcRjmGYJ3kATyiU3AYHYFU4zIr+J0ekbkUnawub1JjKeKSwIeZv4wuB+JBcAIdKPgDez+pCbl6aC3/VNN+SNY/eSl1Xyb5zaeu9aa4xco7UYF21twCQAAAABJRU5ErkJggg==";
+var hero = {
+	x : 0,
+	y : 0,
+	Render : function(){
+         cx.drawImage(heroImg, this.x -(heroImg.width*MAGNIFY /2), this.y -(heroImg.height*MAGNIFY /2), heroImg.width *MAGNIFY, heroImg.height *MAGNIFY);
+	}
+};
+function init()
+{
+    cn = document.getElementById("canv");
+    cx = cn.getContext("2d");
+    cx['imageSmoothingEnabled'] = false;
+    cx['mozImageSmoothingEnabled'] = false;
+    cx['oImageSmoothingEnabled'] = false;
+    cx['msImageSmoothingEnabled'] = false;
+
+	hero.x = cn.width/2;
+    hero.y = cn.height/2;
+    Render();
+}
+function Render()
+{
+	cx.clearRect(0,0,cn.width,cn.height);
+
+    for( var y = 0; y < 10; y ++ ){ for( var x = 0; x < 10; x ++ ){
+            cx.drawImage(grassImg, x * grassImg.width * MAGNIFY, y * grassImg.height * MAGNIFY, grassImg.width * MAGNIFY, grassImg.height * MAGNIFY);
+    }}
+
+	hero.Render();
+}
+window.addEventListener("load",init,false);
+canv.addEventListener("click", function(e){
+    hero.x = e.offsetX;
+    hero.y = e.offsetY;
+    Render();
+},false);
+</script>
+</html>
