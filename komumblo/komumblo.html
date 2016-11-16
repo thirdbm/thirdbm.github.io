@@ -27,7 +27,7 @@
 </center>
 </body>
 <script type="text/javascript">
-var AUC, word, charArr, channels, count, finalString, timer, cv, cx;
+var AUC, sentence, charArr, count, merged, timer, cv, cx;
 var TALKSPEED = 4;
 var mx, my, mw, mh;
 
@@ -105,15 +105,19 @@ function Animation(ww)
 	cx.fillRect((cv.width/2)+ mx -(mw/2), (cv.height/2)+ my -(mh/2) -2, mw, mh);
 }
 
+document.getElementById("speechinput").onclick = function()
+{
+	document.getElementById("speechinput").value = "";
+}
+
 document.getElementById("exebtn").onclick = function()
 {
-	word = "";
+	sentence = "";
 	charArr = [];
-	channels = [];
 	count = 0;
 	timer = 0;
-	finalString = "";
-	word = document.getElementById("speechinput").value;
+	merged = "";
+	sentence = document.getElementById("speechinput").value;
 
 	document.getElementById("speechresult").style.display = "block";
 
@@ -123,10 +127,10 @@ document.getElementById("exebtn").onclick = function()
 function Convert()
 {
 	// put letters into array
-	for( var i=0; i<word.length; i++ )
+	for( var i=0; i<sentence.length; i++ )
 	{
-		var _ch = word.charAt(i);
-		var _chCode = word.charCodeAt(i);
+		var _ch = sentence.charAt(i);
+		var _chCode = sentence.charCodeAt(i);
 
 		if(_chCode >= 44032 && _chCode <= 55203) { ConvertHangul(_chCode); }
 		else if(_chCode >= 12593 && _chCode <= 12622) { ConvertHangulSingle(_chCode); }
@@ -145,9 +149,9 @@ function Convert()
 	}
 
 	// merge
-	finalString = syllables.join("");
+	merged = syllables.join("");
 	document.getElementById("speechresult").value = "";
-	document.getElementById("speechresult").value = finalString;
+	document.getElementById("speechresult").value = merged;
 
 	TikTok();
 }
@@ -316,7 +320,7 @@ function ConvertHangul(vv)
 
 function TikTok()
 {
-	if(count < finalString.length ){
+	if(count < merged.length ){
 		window.requestAnimationFrame(TikTok);
 	
 		if(timer >= TALKSPEED){
@@ -332,17 +336,17 @@ function TikTok()
 
 function Speak()
 {
-	var audiofile = MatchPhoneme(finalString.charAt(count), finalString.charAt(count-1), finalString.charAt(count+1));
+	var source = MatchPhoneme(merged.charAt(count), merged.charAt(count-1), merged.charAt(count+1));
 
 	count++;
 	
-	if(audiofile == null){
+	if(source == null){
 		Speak();
 	}
 	else {
-		audiofile.load();
-		audiofile.play();
-		Animation(audiofile);
+		source.load();
+		source.play();
+		Animation(source);
 	}
 }
  
