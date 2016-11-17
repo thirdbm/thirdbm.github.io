@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -27,7 +28,7 @@
 </center>
 </body>
 <script type="text/javascript">
-var AUC, sentence, charArr, count, merged, timer, cv, cx;
+var AUC, sentence, charArr, count, merged, timer, cv, cx, isSpeaking;
 var TALKSPEED = 4;
 var mx, my, mw, mh;
 
@@ -63,11 +64,10 @@ window.addEventListener("load", function()
 	AUC.Y = SetChannel("wav/y.wav");;
 	AUC.Z = SetChannel("wav/z.wav");;
 
+	isSpeaking = false;
 	document.getElementById("speechinput").value = "안녕하세요? 저는 코멈블로라고 해요.";
-
 	cv = document.getElementById("canvas1");
 	cx = cv.getContext("2d");
-
 	document.getElementById("speechresult").style.display = "none";
 
 	Animation(null);
@@ -112,16 +112,20 @@ document.getElementById("speechinput").onclick = function()
 
 document.getElementById("exebtn").onclick = function()
 {
-	sentence = "";
-	charArr = [];
-	count = 0;
-	timer = 0;
-	merged = "";
-	sentence = document.getElementById("speechinput").value;
+	if(isSpeaking==false)
+	{
+		isSpeaking = true;
+		
+		sentence = "";
+		charArr = [];
+		count = 0;
+		timer = 0;
+		merged = "";
+		sentence = document.getElementById("speechinput").value;
+		document.getElementById("speechresult").style.display = "block";
 
-	document.getElementById("speechresult").style.display = "block";
-
-	Convert();
+		Convert();
+	}	
 }
 
 function Convert()
@@ -330,19 +334,17 @@ function TikTok()
 		else{ timer++; }
 	}
 	else {
-		Animation(null);
+		isSpeaking = false;
+		Animation(null);		
 	}
 }
 
 function Speak()
 {
 	var source = MatchPhoneme(merged.charAt(count), merged.charAt(count-1), merged.charAt(count+1));
-
 	count++;
 	
-	if(source == null){
-		Speak();
-	}
+	if(source == null){ Speak(); }
 	else {
 		source.load();
 		source.play();
@@ -401,7 +403,6 @@ function MatchPhoneme(ww, wwPrev, wwNext)
 		else if(ww=="Z") { return AUC.Z; }
 		else { return null; }
 	}
-
 }
 </script>
 </html>
