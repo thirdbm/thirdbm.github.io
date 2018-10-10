@@ -1,0 +1,57 @@
+body {
+	background-color: #000000;	
+	margin:0px;
+	padding:0px;
+}
+body, div {
+	font-family: verdana;
+	font-size:12px;
+	color:#FFFFFF;
+}
+a:link, a:visited, a:hover, a:active {
+	color:#AAFFDD;
+	text-decoration: none;
+	font-family: verdana, courier;
+}
+
+.container{
+	display: block;
+  	height:220px;
+  	padding:0px;
+  	margin:0px;
+  	text-align: center;
+}
+.backImage{
+	display: block;
+	width : 100%;
+	max-height: 220px;
+	min-height:220px;
+	object-fit: cover;
+	position:absolute;
+	z-index: 0;
+	opacity: 0.6;
+}
+.contents{
+	height:100%;
+	position:relative;
+	z-index:1;
+	text-shadow:
+		0px 0px 10px #000000,
+		0px 1px 14px #000000,
+		1px 2px 20px #000000;
+	padding:20px;
+}
+.footer{
+	padding:20px;
+	text-align: center;
+}
+
+.txtBig{ font-size: 24px; font-weight: bold }
+.vspacing { height:10px; margin:0px; padding:0px;}
+
+.storebadge {
+	width:150px;
+}
+.companyLogo{
+	width:280px;
+}
