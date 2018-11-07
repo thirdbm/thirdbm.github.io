@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Hairy Portrait Generator</title>
+<style>
+	a {	color : #aaff00; text-decoration : none; }
+	body { background-color:#222222; margin-top:8px; color : #eeeeee; font-family:Verdana; font-size:16px; margin:0px; padding:0px; }
+</style>
+</head>
+<body>
+<center>
+<h2>Hairy Portrait Generator</h2>
+<canvas id="mainCanvas" style="border:8px solid #B3790E;" width="156" height="210"></canvas>
+<br>
+<input id="refresh" type="button" value="REFRESH" onClick="document.location.reload(true)" style="border:0px solid #fff; color:#fff; background:#B3790E; width:90px; height:30px;">
+<p>2014-05-23<br>
+<a href="http://thirdbm.github.io">thirdbm.github.io</a>
+</p>
+</center>
+</body>
+<script>
+var canv = document.getElementById('mainCanvas');
+var ctx = canv.getContext('2d');
+
+var
+UNIT = 6,
+counter = 0,
+r = Math.floor(Math.random() * 255),
+g = Math.floor(Math.random() * 255),
+b = Math.floor(Math.random() * 255),
+rr = Math.floor(r * 0.8),
+gg = Math.floor(g * 0.8),
+bb = Math.floor(b * 0.8),
+color2 = "rgba(" + r + "," + g + "," + b + ",1)",
+color1 = "rgba(" + rr + "," + gg + "," + bb + ",1)",
+diceHair = Math.random(),
+diceBeard = Math.random(),
+diceSideburns = Math.random(),
+diceMustache = Math.random(),
+posHair = 0,
+posBeard = 0,
+posBeard2 = 0,
+posSideburns = 0,
+posSideburns2 = 0,
+posMustache = 0,
+posMustache2 = 0;
+
+window.addEventListener("load",start,true);
+
+function box(x,y) {
+	x = x * UNIT;
+	y = y * UNIT;
+	ctx.fillRect( x +(UNIT*9) , y +(UNIT*9) , UNIT , UNIT );
+}
+
+function start() {
+	ctx.clearRect(0,0,canv.width,canv.height);
+	// draw bg base
+	var min1 = 245;
+	for(var y=0; y<=canv.height; y+=UNIT){
+		for(var i=0; i<=canv.width; i+=UNIT){
+			var rgb1 = Math.ceil(Math.random()*(255-min1+1)+min1);
+			var rgbAll = "rgb("+rgb1+","+rgb1+","+rgb1+")";
+			ctx.fillStyle = rgbAll;
+			ctx.fillRect(i,y,UNIT,UNIT);
+		}
+	}
+
+	// draw face base
+	var f_r = Math.floor(Math.random() * 255);
+	var f_g = Math.floor(Math.random() * 255);
+	var f_b = Math.floor(Math.random() * 255);
+	var faceColor = "rgba(" + f_r + "," + f_g + "," + f_b + ",1)";
+	ctx.fillStyle = faceColor;
+	box(2,1);box(3,1);box(4,1);box(5,1);
+	box(1,2);box(2,2);box(3,2);box(4,2);box(5,2);box(6,2);
+	box(1,3);box(2,3);box(3,3);box(4,3);box(5,3);box(6,3);
+	box(1,4);box(2,4);box(3,4);box(4,4);box(5,4);box(6,4);
+	box(1,5);box(2,5);box(3,5);box(4,5);box(5,5);box(6,5);
+	box(1,6);box(2,6);box(3,6);box(4,6);box(5,6);box(6,6);
+	box(2,7);box(3,7);box(4,7);box(5,7);
+	var e_r = Math.floor(Math.random() * 255);
+	var e_g = Math.floor(Math.random() * 255);
+	var e_b = Math.floor(Math.random() * 255);
+	var eyeColor = "rgba(" + e_r + "," + e_g + "," + e_b + ",1)";
+	ctx.fillStyle = eyeColor;
+	box(2,3);box(5,3); // eyes
+	box(3,6);box(4,6); // mouth
+
+	draw();
+}
+
+function draw(){
+	// hair
+	if(diceHair<0.2){ hairA(); }
+	if(diceHair>=0.2 && diceHair<0.4){ hairB(); }
+	if(diceHair>=0.4 && diceHair<0.6){ hairC(); }
+	if(diceHair>=0.6 && diceHair<0.8){ hairD(); }
+	if(diceHair>=0.8){ hairE(); }
+	// beard
+	if(diceBeard<0.2){ beardA(); }
+	if(diceBeard>=0.2 && diceBeard<0.4){ beardB(); }
+	if(diceBeard>=0.4 && diceBeard<0.6){ beardC(); }
+	if(diceBeard>=0.6 && diceBeard<0.8){ beardD(); }
+	if(diceBeard>=0.8){ beardE(); }
+	// sideburns
+	if(diceSideburns<0.2){ sideburnsA(); }
+	if(diceSideburns>=0.2 && diceSideburns<0.4){ sideburnsB(); }
+	if(diceSideburns>=0.4 && diceSideburns<0.6){ sideburnsC(); }
+	if(diceSideburns>=0.6 && diceSideburns<0.8){ sideburnsD(); }
+	if(diceSideburns>=0.8){ sideburnsE(); }
+	// mustache
+	if(diceMustache<0.2){ mustacheA(); }
+	if(diceMustache>=0.2 && diceMustache<0.4){ mustacheB(); }
+	if(diceMustache>=0.4 && diceMustache<0.6){ mustacheC(); }
+	if(diceMustache>=0.6 && diceMustache<0.8){ mustacheD(); }
+	if(diceMustache>=0.8){ mustacheE(); }
+
+	counter++;
+
+	if ( counter < 20 ) {
+		setTimeout(draw,100);
+	}
+}
+
+function hairA(){
+	ctx.fillStyle = color1;
+	if(posHair <= 3){
+		posHair++;
+		box(1,2 -posHair);
+		box(2,1 -posHair);
+		box(3,1 -posHair);
+		box(4,1 -posHair);
+		box(5,1 -posHair);
+		box(6,2 -posHair);
+	}
+}
+function hairB(){
+	ctx.fillStyle = color1;
+	if(posHair <= 2){
+		posHair++;
+		box(1 -posHair,3 -posHair);
+		box(2 -posHair,2 -posHair);
+		box(3 -posHair,1 -posHair);
+		box(4 +posHair,1 -posHair);
+		box(5 +posHair,2 -posHair);
+		box(6 +posHair,3 -posHair);
+	}
+}
+function hairC(){
+	ctx.fillStyle = color1;
+	box(1,1);
+	box(2,0);
+	box(3,0);
+	box(4,0);
+	box(5,0);
+	box(6,1);
+}
+function hairD(){
+	ctx.fillStyle = color1;
+	if(posHair <= 3){
+		posHair++;
+		box(3,1 -posHair);
+		box(4,1 -posHair);
+	}
+}
+function hairE(){
+	ctx.fillStyle = color1;
+	if(posHair <= 2){
+		posHair++;
+		box(1,2 -posHair);
+		box(2,1 -posHair);
+		box(5,1 -posHair);
+		box(6,2 -posHair);
+	}
+}
+function beardA(){
+	ctx.fillStyle = color1;
+	if(posBeard <= 14){
+		posBeard++;
+		box(1,5 +posBeard);
+		box(2,6 +posBeard);
+		box(3,7 +posBeard);
+		box(4,7 +posBeard);
+		box(5,6 +posBeard);
+		box(6,5 +posBeard);
+	}
+}
+function beardB(){
+	ctx.fillStyle = color1;
+	if(posBeard <= 2){
+		posBeard++;
+		box(1 -posBeard,5 +posBeard);
+		box(2 -posBeard,6 +posBeard);
+		box(3 -posBeard,7 +posBeard);
+		box(4 +posBeard,7 +posBeard);
+		box(5 +posBeard,6 +posBeard);
+		box(6 +posBeard,5 +posBeard);
+	}
+}
+function beardC(){
+	ctx.fillStyle = color1;
+	if(posBeard <= 1){
+		posBeard++;
+		box(1,5 +posBeard);
+		box(2,6 +posBeard);
+		box(3,7 +posBeard);
+		box(4,7 +posBeard);
+		box(5,6 +posBeard);
+		box(6,5 +posBeard);
+	}
+}
+function beardD(){
+	ctx.fillStyle = color1;
+	if(posBeard <= 3){
+		posBeard++;
+		box(1,6 +posBeard);
+		box(3,8);
+		box(4,8);
+		box(6,6 +posBeard);
+	}
+	if(posBeard > 3){
+		if(posBeard2 <= 1){
+			posBeard2++;
+			box(2,7 +posBeard2);
+			box(5,7 +posBeard2);
+		}
+	}
+}
+function beardE(){
+	ctx.fillStyle = color1;
+	box(3,8);
+	box(4,8);
+}
+function sideburnsA(){
+	if(posSideburns <= 4){
+		posSideburns++;
+		ctx.fillStyle = color1;
+		box(0,1 +posSideburns);
+		box(7,1 +posSideburns);
+	}
+}
+function sideburnsB(){
+	if(posSideburns <= 12){
+		posSideburns++;
+		ctx.fillStyle = color1;
+		box(0,1 +posSideburns);
+		box(7,1 +posSideburns);
+	}
+}
+function sideburnsC(){
+	posSideburns++;
+	if(posSideburns <= 3){
+		ctx.fillStyle = color2;
+		box(0,1 +posSideburns);
+		box(7,1 +posSideburns);
+	}
+	if(posSideburns > 3){
+		if(posSideburns2 <= 2){
+			posSideburns2++;
+			ctx.fillStyle = color2;
+			box(0 -posSideburns2,4 +posSideburns2);
+			box(7 +posSideburns2,4 +posSideburns2);
+		}
+		
+	}
+}
+function sideburnsD(){
+	posSideburns++;
+	if(posSideburns <= 5){
+		ctx.fillStyle = color2;
+		box(2 -posSideburns,2 -posSideburns);
+		box(5 +posSideburns,2 -posSideburns);
+	}
+}
+function sideburnsE(){
+	ctx.fillStyle = color2;
+	box(1,1);
+	box(6,1);
+}
+function mustacheA(){
+	if(posMustache <= 8){
+		posMustache++;
+		ctx.fillStyle = color2;
+		box(4 -posMustache,4 +posMustache);
+		box(3 +posMustache,4 +posMustache);
+	}
+}
+function mustacheB(){
+	if(posMustache <= 1){
+		posMustache++;
+		ctx.fillStyle = color2;
+		box(4 -posMustache,5);
+		box(3 +posMustache,5);
+	}
+	if(posMustache > 1){
+		ctx.fillStyle = color2;
+		box(1,4);
+		box(6,4);
+	}
+}
+function mustacheC(){
+	posMustache++;
+	if(posMustache <= 2){
+		ctx.fillStyle = color2;
+		box(4 -posMustache,5);
+		box(3 +posMustache,5);
+	}
+	if(posMustache > 2){
+		if(posMustache2 <= 10){
+			posMustache2++;
+			ctx.fillStyle = color2;
+			box(2,5 +posMustache2);
+			box(5,5 +posMustache2);
+		}
+	}
+}
+function mustacheD(){
+	posMustache++;
+	if(posMustache <= 2){
+		ctx.fillStyle = color2;
+		box(4 -posMustache,5);
+		box(3 +posMustache,5);
+	}
+	if(posMustache > 2){
+		if(posMustache2 <= 1){
+			posMustache2++;
+			ctx.fillStyle = color2;
+			box(2,5 +posMustache2);
+			box(5,5 +posMustache2);
+		}
+	}
+}
+function mustacheE(){
+	ctx.fillStyle = color2;
+	box(4,5);
+	box(3,5);
+}
+</script>
+</html>
