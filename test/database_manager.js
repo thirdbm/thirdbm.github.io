@@ -35,27 +35,28 @@ function displayAll(){
         tx.executeSql(source, [], function (tx, results) {
             //var len = results.rows.length, i;
             var len = results.rows.length;
-            document.getElementById("rowCount").innerHTML = "Total : " + len;
+            document.getElementById("rowCount").innerHTML = "(Total : " + len + ")";
 
             var divT = "";
 
             for(var i=0; i<len; i++) {
-                var element = results.rows.item(i);                
+                var element = results.rows.item(i);
                 
                 //var msg = "<div>" + element.ID + " | " + element.createDate + " | " + element.message + "</div>"
                 //document.querySelector("#status").innerHTML += msg;
 
                 divT += '<div class="row">';
-                divT += '<div class="col1">' + element.ID + '</div>';
-                divT += '<div class="col2">' + element.createDate + '</div>';
-                divT += '<div class="col3">' + element.message + '</div>';
-                divT += '<div class="col4"><a href="#" onclick="editDB(' + element.ID + ')">Edit</a></div>';
-                divT += '<div class="col5"><a href="#" onclick="deleteDB(' + element.ID + ')">X</a></div>'
+                divT += '<div class="col s1 db1 alignLeftTop line">' + element.ID + '</div>';
+                divT += '<div class="col s2 db2 alignLeftTop line">' + element.createDate + '</div>';
+                divT += '<div class="col s3 db3 alignLeftTop line">' + element.message + '</div>';
+                divT += '<div class="col s4 db4 alignCenter"><a href="#" onclick="editDB(' + element.ID + ')">Edit</a></div>';
+                divT += '<div class="col s5 db5 alignCenter"><a href="#" onclick="deleteDB(' + element.ID + ')">X</a></div>'
                 divT += '</div>';
             }
 
-            //document.querySelector("#mainTable").innerHTML = divT;
-            document.getElementById("mainTable").innerHTML = divT;
+            //document.querySelector("#dbTable").innerHTML = divT;
+            document.getElementById("dbTable").innerHTML = divT;
+            //document.getElementById("tTable").innerHTML += divT;
         }, null )
     });
 }
@@ -65,34 +66,35 @@ function insertDB(_message_){
         //tx.executeSql('INSERT INTO ' + tablename + ' (name, madeDate) VALUES (?, ?)', ['BlaBla', new Date()]);
         tx.executeSql('INSERT INTO ' + tablename + ' (createDate, message) VALUES (?, ?)', [getCurrentDate(), _message_], displayAll());
     });
+    document.getElementById("writeArea").value = "";
 }
 
-function addRow(){
-    var finalmsg = [];
+function addRow(){    
     var msg = document.getElementById("writeArea").value;
+    var finalmsg;
 
     if(msg == "" || msg.trim().length <= 0 || msg == null){
         finalmsg = "Empty";
     }
-    
-    //var numberOfLineBreaks = (msg.match(/\n/g)||[]).length;
-    for(var i=0; i<msg.length; i++){     
-        if(msg[i] == "\n"){
-            finalmsg.push("<br>");
+    else {
+        finalmsg = [];
+        //var numberOfLineBreaks = (msg.match(/\n/g)||[]).length;
+        for(var i=0; i<msg.length; i++){     
+            if(msg[i] == "\n"){
+                finalmsg.push("<br>");
+            } else {
+                finalmsg.push(msg[i]);
+            }
         }
-        else {
-            finalmsg.push(msg[i]);
-        }
+        finalmsg = finalmsg.join("").trim();
     }
-    
-    finalmsg = finalmsg.join("").trim();
     
     insertDB(finalmsg);
 }
 
 function deleteDB(_id_){
     db.transaction(function(tx){
-        var result = confirm('Are you sure?');
+        var result = confirm('Are you sure you want to delete this line?');
         if(result === true)
             tx.executeSql('DELETE FROM ' + tablename + ' WHERE ID = ?', [_id_], displayAll());
     });
