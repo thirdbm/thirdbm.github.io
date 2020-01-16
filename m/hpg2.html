@@ -14,13 +14,10 @@
 <h2>Hairy Portrait Generator II</h2>
 <canvas id="canvas"></canvas><br>
 <p>
-<a id="btn_refresh" style="background:#ff6600; padding:10px; color:#ffffff; font-weight:bold; border:0px;">Refresh</a><br><br><br>
-<a id="btn_save" download="HairyPortrait.png" style="background:#666666; padding:8px; color:#ffffff; font-weight:bold;">Save to PNG</a><br><br>
+<a id="btn_refresh" style="background:#ff6600; padding:10px; color:#ffffff; font-weight:bold; border:0px;">Refresh</a><br>
+<!--<a id="btn_save" download="HairyPortrait.png" style="background:#666666; padding:8px; color:#ffffff; font-weight:bold;">Save to PNG</a>-->
 </p>
-<p>Verified working browsers : Chrome(PC), Firefox(PC), Safari(iOS)</p>
-<p>2015-12-04<br>
-<a href="http://thirdbm.github.io">thirdbm.github.io</a>	
-</p>
+<p>2015-12-04</p>
 </center>
 </body>
 <script>
@@ -250,10 +247,11 @@ function execute() {
 }
 
 btn_refresh.addEventListener("click", execute, false);
+/*
 btn_save.addEventListener("click", function(){
 	this.href = cv.toDataURL("image/png");;
 }, false);
-
+*/
 window.addEventListener("load",execute,false);
 </script>
 </html>
