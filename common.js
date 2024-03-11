@@ -1,6 +1,6 @@
 let header = 
 '<div class="mainMenu">' +
-	'<a href="https://thirdbm.github.io">Home</a> | ' +
+	'<a href="https://mauvx.com">Home</a> | ' +
     '<a href="./archive.html">Archive</a> | ' +
     '<a href="./games.html">Games</a> | ' +
     '<a href="./about.html">About</a>' +
