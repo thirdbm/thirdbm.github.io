@@ -74,7 +74,7 @@ a:link, a:visited, a:hover, a:active {
 
 .tableP { display:table; width:100%; margin-left:auto; margin-right:auto; height:auto; }
 .tableP .row { display:table-row; }
-.tableP .row .cell { display:table-cell; height:auto; }
+.tableP .row .cell { display:table-cell; height:auto; width:auto;}
 .cardFixed { width:99%; }
 
 .pageContent {
