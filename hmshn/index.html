@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js FPS Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: sans-serif;
+        }
+        #blocker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #instructions {
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        #instructions h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="blocker">
+        <div id="instructions">
+            <h1>클릭하여 시작하기</h1>
+            <p>이동 : W, A, S, D<br>
+            높낮이: Q (상승), E (하강)<br>
+            시점 변환 : 마우스 이동<br>
+            종료 : ESC</p>
+        </div>
+    </div>
+
+    <!-- Import Map을 이용한 Three.js 및 애드온 불러오기 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+        // Post-processing 및 SSAO 관련 모듈 추가
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+
+        let camera, scene, renderer, controls;
+        let composer; // Post-processing composer
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let moveUp = false;
+        let moveDown = false;
+
+        let prevTime = performance.now();
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+
+        init();
+        animate();
+
+        function init() {
+            // 씬 설정
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111); // 하늘색 배경
+            //scene.fog = new THREE.FogExp2(0x111111, 0.02);
+            scene.fog = new THREE.Fog(0x111111, 20, 100);
+
+            // 카메라 설정
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 5);
+            camera.rotation.set(0,-0.5,0);
+
+            // 렌더러 설정
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            document.body.appendChild(renderer.domElement);
+
+            // --- Post-processing(EffectComposer) 및 SSAO 설정 ---
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            // SSAOPass 생성 (화면 공간 음영 효과)
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const ssaoPass = new SSAOPass(scene, camera, width, height);
+            ssaoPass.kernelRadius = 0.5;  // AO 샘플링 반경 (간격 조절)
+            ssaoPass.minDistance = 0.0005; 
+            ssaoPass.maxDistance = 0.2;
+            //ssaoPass.output = SSAOPass.OUTPUT.Default;
+            //ssaoPass.intensity = 1.0;
+            //ssaoPass.blurRadius = 4;
+            composer.addPass(ssaoPass);
+
+            // PointerLockControls 설정
+            controls = new PointerLockControls(camera, renderer.domElement);
+
+            const blocker = document.getElementById('blocker');
+            blocker.addEventListener('click', function () {
+                controls.lock();
+            });
+
+            controls.addEventListener('lock', function () {
+                blocker.style.display = 'none';
+            });
+
+            controls.addEventListener('unlock', function () {
+                blocker.style.display = 'flex';
+            });
+
+            scene.add(controls.getObject());
+
+            // 키보드 이벤트 리스너
+            const onKeyDown = function (event) {
+                switch (event.code) {
+                    case 'KeyW': moveForward = true; break;
+                    case 'KeyS': moveBackward = true; break;
+                    case 'KeyA': moveLeft = true; break;
+                    case 'KeyD': moveRight = true; break;
+                    case 'KeyQ': moveUp = true; break;
+                    case 'KeyE': moveDown = true; break;
+                }
+            };
+
+            const onKeyUp = function (event) {
+                switch (event.code) {
+                    case 'KeyW': moveForward = false; break;
+                    case 'KeyS': moveBackward = false; break;
+                    case 'KeyA': moveLeft = false; break;
+                    case 'KeyD': moveRight = false; break;
+                    case 'KeyQ': moveUp = false; break;
+                    case 'KeyE': moveDown = false; break;
+                }
+            };
+
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+            scene.add(ambientLight);
+/*
+            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.0);
+            dirLight.position.set(15, 90, -15);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 100;
+            const d = 20;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            dirLight.shadow.bias = -0.0005;
+            scene.add(dirLight);
+
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+            hemiLight.position.set(0, 50, 0);
+            scene.add(hemiLight);
+*/
+            // GLTF 건축물 모델 로드
+            const loader = new GLTFLoader();
+            loader.load('model.glb', function (gltf) {
+                const model = gltf.scene;
+                model.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        if (child.material) {
+                            child.material.roughness = Math.max(child.material.roughness, 1.0);
+
+                            //child.material.emissive = new THREE.Color(0xffffff); // Emission Color
+                            //child.material.emissiveIntensity = 1.0; // Emission Intensity
+                            //child.material.metalness = 1.0; // Metallic
+                            //child.material.color.set(0xff0000); // Base Color, Albedo
+                            //child.material.normalScale.set(2.0, 2.0); // Normal Scale
+                            //child.material.envMapIntensity = 1.5; // Environment Map (HDRI) Intensity
+                            // Opacity & Transparent
+                            //child.material.transparent = true;
+                            //child.material.opacity = 0.5; // 반투명 (50%)
+                            //child.material.wireframe = true; // 선 형태로 렌더링
+
+                            // 양면 모두 렌더링 DoubleSide, 기본값은 FrontSide, 뒷면만 THREE.BackSide
+                            //child.material.side = THREE.DoubleSide;
+                        }
+                    }
+                });
+                model.position.set(0, 0, 0);
+                model.scale.set(1, 1, 1); // 모델 크기에 맞게 조절
+                scene.add(model);
+            }, undefined, function (error) {
+                console.error('GLTF 모델을 불러오는 중 오류가 발생했습니다:', error);
+            });
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight); // 후처리 크기 동기화
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+
+            if (controls.isLocked === true) {
+                const delta = (time - prevTime) / 1000;
+
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                velocity.y -= velocity.y * 10.0 * delta;
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.y = Number(moveUp) - Number(moveDown);
+                direction.normalize();
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * 40.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 40.0 * delta;
+                if (moveUp || moveDown) velocity.y += direction.y * 40.0 * delta;
+
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                
+                controls.getObject().position.y += velocity.y * delta;
+            }
+
+            prevTime = time;
+
+            // 일반 렌더러 대신 EffectComposer를 통해 렌더링 수행 (SSao 적용)
+            composer.render();
+            //renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
