@@ -66,9 +66,20 @@
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+        import { SSRPass } from 'three/addons/postprocessing/SSRPass.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+		import { ReflectorForSSRPass } from 'three/addons/objects/ReflectorForSSRPass.js';
 
+        const params = {
+            enableSSR: true,
+            groundReflector: true,
+        };
         let camera, scene, renderer, controls;
         let composer; // Post-processing composer
+        let ssrPass;
+        let groundReflector;
+        const selects = [];
+
         let moveForward = false;
         let moveBackward = false;
         let moveLeft = false;
@@ -95,6 +106,7 @@
             camera.position.set(0, 2, 5);
             camera.rotation.set(0,-0.5,0);
 
+
             // 렌더러 설정
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -104,12 +116,173 @@
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.0;
             renderer.outputColorSpace = THREE.SRGBColorSpace;
+            //renderer.setAnimationLoop( animate );
             document.body.appendChild(renderer.domElement);
+
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+            scene.add(ambientLight);
+/*
+            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.0);
+            dirLight.position.set(15, 90, -15);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 100;
+            const d = 20;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            dirLight.shadow.bias = -0.0005;
+            scene.add(dirLight);
+
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+            hemiLight.position.set(0, 50, 0);
+            scene.add(hemiLight);
+
+            const spotLight = new THREE.SpotLight();
+			spotLight.intensity = 50;
+			//spotLight.angle = Math.PI / 16;
+            spotLight.angle = Math.PI;
+			spotLight.penumbra = 0.5;
+			// spotLight.castShadow = true;
+			spotLight.position.set( 2, 1, -24 );
+			scene.add( spotLight );
+*/
+            // Ground
+			const plane = new THREE.Mesh(
+				new THREE.PlaneGeometry( 100, 100 ),
+				new THREE.MeshPhongMaterial( { color: 0x888888 } )
+			);
+			plane.rotation.x = - Math.PI / 2;
+			plane.position.y = - 0.0001;
+			// plane.receiveShadow = true;
+			scene.add( plane );
+
+            // GLTF 건축물 모델 로드
+            const loader = new GLTFLoader();
+            loader.load('model.glb', function (gltf) {
+                const model = gltf.scene;
+                model.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        if (child.material) {
+                            //child.material.roughness = Math.max(child.material.roughness, 0.1);
+
+                            //child.material.emissive = new THREE.Color(0xffffff); // Emission Color
+                            //child.material.emissiveIntensity = 1.2; // Emission Intensity
+                            //child.material.metalness = 1.0; // Metallic
+                            //child.material.color.set(0xff0000); // Base Color, Albedo
+                            //child.material.normalScale.set(2.0, 2.0); // Normal Scale
+                            //child.material.envMapIntensity = 1.5; // Environment Map (HDRI) Intensity
+                            // Opacity & Transparent
+                            //child.material.transparent = true;
+                            //child.material.opacity = 0.5; // 반투명 (50%)
+                            //child.material.wireframe = true; // 선 형태로 렌더링
+
+                            // 양면 모두 렌더링 DoubleSide, 기본값은 FrontSide, 뒷면만 THREE.BackSide
+                            //child.material.side = THREE.DoubleSide;
+                        }
+                    }
+                });
+                model.position.set(0, 0, 0);
+                model.scale.set(1, 1, 1); // 모델 크기에 맞게 조절
+                scene.add(model);
+                selects.push( model );
+            }, undefined, function (error) {
+                console.error('GLTF 모델을 불러오는 중 오류가 발생했습니다:', error);
+            });
 
             // --- Post-processing(EffectComposer) 및 SSAO 설정 ---
             composer = new EffectComposer(renderer);
             const renderPass = new RenderPass(scene, camera);
             composer.addPass(renderPass);
+
+            // SSR
+            let geometry;
+            /*
+            let material, mesh;
+            geometry = new THREE.BoxGeometry( .05, .05, .05 );
+			material = new THREE.MeshStandardMaterial( { color: 'green' } );
+			mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set( - .12, .025, .015 );
+			scene.add( mesh );
+			selects.push( mesh );
+
+			geometry = new THREE.IcosahedronGeometry( .025, 4 );
+			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
+			mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set( - .05, .025, .08 );
+			scene.add( mesh );
+			selects.push( mesh );
+
+			geometry = new THREE.ConeGeometry( .025, .05, 64 );
+			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
+			mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set( - .05, .025, - .055 );
+			scene.add( mesh );
+			selects.push( mesh );
+            */
+            geometry = new THREE.PlaneGeometry( 100, 100 );
+            groundReflector = new ReflectorForSSRPass( geometry, {
+				clipBias: 0.0003,
+				textureWidth: window.innerWidth,
+				textureHeight: window.innerHeight,
+				color: 0x888888,
+				useDepthTexture: true,
+			} );
+            groundReflector.material.depthWrite = false;
+			groundReflector.rotation.x = - Math.PI / 2;
+			groundReflector.visible = false;
+			scene.add( groundReflector );
+
+            ssrPass = new SSRPass( {
+				renderer,
+				scene,
+				camera,
+				width: innerWidth,
+				height: innerHeight,
+				groundReflector: params.groundReflector ? groundReflector : null,
+				selects: params.groundReflector ? selects : null
+			} );
+            if ( params.groundReflector ) { 
+                ssrPass.groundReflector = groundReflector;
+                ssrPass.selects = selects; 
+            } else { 
+                ssrPass.groundReflector = null;
+                ssrPass.selects = null; 
+            }
+            ssrPass.thickness = 0.018;
+            ssrPass.infiniteThick = false;
+            ssrPass.fresnel = true;
+            groundReflector.fresnel = ssrPass.fresnel;
+            ssrPass.distanceAttenuation = true;
+            groundReflector.distanceAttenuation = ssrPass.distanceAttenuation;
+            //ssrPass.maxDistance = .1;
+            ssrPass.maxDistance = 2.5;
+            groundReflector.maxDistance = ssrPass.maxDistance;
+            ssrPass.bouncing = true;
+            ssrPass.output = SSRPass.OUTPUT.Default;
+            /*
+            {
+                'Default': SSRPass.OUTPUT.Default,
+				'SSR Only': SSRPass.OUTPUT.SSR,
+				'Beauty': SSRPass.OUTPUT.Beauty,
+				'Depth': SSRPass.OUTPUT.Depth,
+				'Normal': SSRPass.OUTPUT.Normal,
+				'Metalness': SSRPass.OUTPUT.Metalness,
+            };
+            */
+            ssrPass.opacity = 1;
+            groundReflector.opacity = ssrPass.opacity;
+
+            composer.addPass( ssrPass );
+			//composer.addPass( new OutputPass() );
+
 
             // SSAOPass 생성 (화면 공간 음영 효과)
             const width = window.innerWidth;
@@ -118,10 +291,11 @@
             ssaoPass.kernelRadius = 0.5;  // AO 샘플링 반경 (간격 조절)
             ssaoPass.minDistance = 0.0005; 
             ssaoPass.maxDistance = 0.2;
-            //ssaoPass.output = SSAOPass.OUTPUT.Default;
+            ssaoPass.output = SSAOPass.OUTPUT.Default;
             //ssaoPass.intensity = 1.0;
             //ssaoPass.blurRadius = 4;
             composer.addPass(ssaoPass);
+
 
             // PointerLockControls 설정
             controls = new PointerLockControls(camera, renderer.domElement);
@@ -167,63 +341,6 @@
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
-            scene.add(ambientLight);
-/*
-            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.0);
-            dirLight.position.set(15, 90, -15);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 2048;
-            dirLight.shadow.mapSize.height = 2048;
-            dirLight.shadow.camera.near = 0.5;
-            dirLight.shadow.camera.far = 100;
-            const d = 20;
-            dirLight.shadow.camera.left = -d;
-            dirLight.shadow.camera.right = d;
-            dirLight.shadow.camera.top = d;
-            dirLight.shadow.camera.bottom = -d;
-            dirLight.shadow.bias = -0.0005;
-            scene.add(dirLight);
-
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
-            hemiLight.position.set(0, 50, 0);
-            scene.add(hemiLight);
-*/
-            // GLTF 건축물 모델 로드
-            const loader = new GLTFLoader();
-            loader.load('model.glb', function (gltf) {
-                const model = gltf.scene;
-                model.traverse(function (child) {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        if (child.material) {
-                            child.material.roughness = Math.max(child.material.roughness, 1.0);
-
-                            //child.material.emissive = new THREE.Color(0xffffff); // Emission Color
-                            //child.material.emissiveIntensity = 1.0; // Emission Intensity
-                            //child.material.metalness = 1.0; // Metallic
-                            //child.material.color.set(0xff0000); // Base Color, Albedo
-                            //child.material.normalScale.set(2.0, 2.0); // Normal Scale
-                            //child.material.envMapIntensity = 1.5; // Environment Map (HDRI) Intensity
-                            // Opacity & Transparent
-                            //child.material.transparent = true;
-                            //child.material.opacity = 0.5; // 반투명 (50%)
-                            //child.material.wireframe = true; // 선 형태로 렌더링
-
-                            // 양면 모두 렌더링 DoubleSide, 기본값은 FrontSide, 뒷면만 THREE.BackSide
-                            //child.material.side = THREE.DoubleSide;
-                        }
-                    }
-                });
-                model.position.set(0, 0, 0);
-                model.scale.set(1, 1, 1); // 모델 크기에 맞게 조절
-                scene.add(model);
-            }, undefined, function (error) {
-                console.error('GLTF 모델을 불러오는 중 오류가 발생했습니다:', error);
-            });
-
             window.addEventListener('resize', onWindowResize);
         }
 
@@ -232,6 +349,9 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight); // 후처리 크기 동기화
+
+            groundReflector.getRenderTarget().setSize( window.innerWidth, window.innerHeight );
+			groundReflector.resolution.set( window.innerWidth, window.innerHeight );
         }
 
         function animate() {
