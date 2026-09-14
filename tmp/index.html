@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배경 슬라이드쇼 & 중앙 텍스트</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* 배경 및 전체 페이지 스크롤 차단 */
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            color: #ffffff;
+        }
+
+        /* 배경 이미지 컨테이너 (스크롤 불가) */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out; /* 크로스페이드 기본값 */
+        }
+
+        .bg-slide.active {
+            opacity: 1;
+        }
+
+        /* 크로스페이드가 꺼져 있을 때 (전환 애니메이션 제거) */
+        .no-fade .bg-slide {
+            transition: none !important;
+        }
+
+        /* 중앙 정렬 래퍼 (가로/세로 중앙) */
+        .center-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 텍스트 박스 (텍스트만 스크롤 가능) */
+        .text-scroll-area {
+            max-width: 600px;
+            max-height: 70vh; /* 화면의 70%를 넘어가면 내부 스크롤 발생 */
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3); /* 가독성 보조용 반투명 배경 (선택사항) */
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            
+            /* 텍스트 그림자 (가독성 향상) */
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 
+                         0 0 15px rgba(0, 0, 0, 0.7);
+            
+            /* 스크롤바 디자인 (웹킷 브라우저) */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+        }
+
+        .text-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .text-scroll-area::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .text-scroll-area h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .text-scroll-area p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* 조작 컨트롤 패널 (우측 상단) */
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-panel label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body class="">
+
+    <!-- 우측 상단 크로스페이드 토글 -->
+    <div class="control-panel">
+        <label>
+            <input type="checkbox" id="crossfadeToggle" checked>
+            Crossfade 켜기
+        </label>
+    </div>
+
+    <!-- 배경 이미지 컨테이너 -->
+    <div class="bg-container" id="bgContainer"></div>
+
+    <!-- 중앙 텍스트 영역 (스크롤 가능) -->
+    <div class="center-wrapper">
+        <div class="text-scroll-area">
+            <h1>Dynamic Background</h1>
+            <p>이 영역의 텍스트는 내용이 길어지면 <strong>마우스 스크롤이나 터치 드래그</strong>를 통해 스크롤할 수 있습니다. 반면 배경 이미지는 스크롤되지 않고 고정되어 있습니다.</p>
+            <p>이미지는 200밀리초(0.2초)마다 순차적으로 전환되며, 끝까지 도달하면 첫 번째 이미지로 부드럽게 루프됩니다.</p>
+            <p>우측 상단의 체크박스를 통해 Crossfade(부드러운 전환 효과) 옵션을 켜고 끌 수 있습니다.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p><strong>마지막 줄입니다.</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // 샘플 이미지 리스트 (Unsplash 무료 이미지 예시)
+        const images = [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?auto=format&fit=crop&w=1920&q=80'
+        ];
+
+        const bgContainer = document.getElementById('bgContainer');
+        const crossfadeToggle = document.getElementById('crossfadeToggle');
+        const bodyEl = document.body;
+
+        let currentIndex = 0;
+        let slideElements = [];
+
+        // DOM 초기화: 이미지 엘리먼트 생성
+        images.forEach((url, index) => {
+            const div = document.createElement('div');
+            div.className = 'bg-slide';
+            div.style.backgroundImage = `url('${url}')`;
+            if (index === 0) div.classList.add('active');
+            bgContainer.appendChild(div);
+            slideElements.push(div);
+        });
+
+        // Crossfade 토글 이벤트 반영
+        crossfadeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                bodyEl.classList.remove('no-fade');
+            } else {
+                bodyEl.classList.add('no-fade');
+            }
+        });
+
+        // 200ms 마다 이미지 전환 루프
+        setInterval(() => {
+            // 현재 활성 이미지 해제
+            slideElements[currentIndex].classList.remove('active');
+            
+            // 다음 인덱스 계산 (끝까지 가면 0으로 루프)
+            currentIndex = (currentIndex + 1) % images.length;
+            
+            // 다음 이미지 활성화
+            slideElements[currentIndex].classList.add('active');
+        }, 200);
+    </script>
+</body>
+</html>
